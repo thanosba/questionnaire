@@ -1,0 +1,200 @@
+<!doctype html>
+<html>
+<head>
+<script type="text/javascript">
+var utc = new Date().toJSON().slice(0,10).replace(/-/g,'/');
+document.write(utc);
+</script>
+<meta charset="UTF-8">
+<title>Questionnaire</title>
+<link type='text/css' rel='stylesheet' href='stylesheet.css'/>
+<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Open Sans"/>
+</head>
+<body>
+<div id='container'>
+<div id='title'>
+<h1><i>How are you expert in Mathematics ?</i></h1>
+</div>
+<div>
+    <p style="text-align:center; margin-top:0px; margin-bottom:0px; padding:0px;">
+    <img src='maxresdefault.jpg' alt="image" width="400" height="280"/>
+    </p>    
+    </div>
+<br/>
+<div id='quiz'></div>
+<div class='button' id='next'><a href='#'>Next</a></div>
+<div class='button' id='prev'><a href='#'>Prev</a></div>
+<div class='button' id='start'> <a href='#'>Try again</a></div>   		
+</div>
+<script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js'></script>
+<script type="text/javascript">
+(function() {
+  var questions = [{
+    question: "What is 7 x 8 ? ",
+    choices: [21, 53, 56, 15, 20],
+    correctAnswer: 2
+  }, {
+    question: "What is 25 + 32 : 8 – 5 x 4 ? ",
+    choices: [3, 6, 2, 1, 9],
+    correctAnswer: 4
+  }, {
+    question: "What is (- 5) + (- 3) + (+ 4) + (- 2) + (+ 8) ? ",
+    choices: [2, 9, 7, 4, 1],
+    correctAnswer: 0
+  }, {
+    question: "What is 20 : 2 x 5 + 4,5 ? ",
+    choices: [40, 53, 69, 54 , 85],
+    correctAnswer: 3
+  }, {
+    question: "What is (- 10) + (+12) ? ",
+    choices: [0, 7, 4, 6, 2],
+    correctAnswer: 4
+  }];
+  
+  var questionCounter = 0; //Tracks question number
+  var selections = []; //Array containing user choices
+  var quiz = $('#quiz'); //Quiz div object
+  
+  // Display initial question
+  displayNext();
+  
+  // Click handler for the 'next' button
+  $('#next').on('click', function (e) {
+    e.preventDefault();
+    
+    // Suspend click listener during fade animation
+    if(quiz.is(':animated')) {        
+      return false;
+    }
+    choose();
+    
+    // If no user selection, progress is stopped
+    if (isNaN(selections[questionCounter])) {
+      alert('Please make a selection!');
+    } else {
+      questionCounter++;
+      displayNext();
+    }
+  });
+  
+  // Click handler for the 'prev' button
+  $('#prev').on('click', function (e) {
+    e.preventDefault();
+    
+    if(quiz.is(':animated')) {
+      return false;
+    }
+    choose();
+    questionCounter--;
+    displayNext();
+  });
+  
+  // Click handler for the 'Start Over' button
+  $('#start').on('click', function (e) {
+    e.preventDefault();
+    
+    if(quiz.is(':animated')) {
+      return false;
+    }
+    questionCounter = 0;
+    selections = [];
+    displayNext();
+    $('#start').hide();
+  });
+  
+  // Animates buttons on hover
+  $('.button').on('mouseenter', function () {
+    $(this).addClass('active');
+  });
+  $('.button').on('mouseleave', function () {
+    $(this).removeClass('active');
+  });
+  
+  // Creates and returns the div that contains the questions and 
+  // the answer selections
+  function createQuestionElement(index) {
+    var qElement = $('<div>', {
+      id: 'question'
+    });
+    
+    var header = $('<h2>Question ' + (index + 1) + ':</h2>');
+    qElement.append(header);
+    
+    var question = $('<p>').append(questions[index].question);
+    qElement.append(question);
+    
+    var radioButtons = createRadios(index);
+    qElement.append(radioButtons);
+    
+    return qElement;
+  }
+  
+  // Creates a list of the answer choices as radio inputs
+  function createRadios(index) {
+    var radioList = $('<ul>');
+    var item;
+    var input = '';
+    for (var i = 0; i < questions[index].choices.length; i++) {
+      item = $('<li>');
+      input = '<input type="radio" name="answer" value=' + i + ' />';
+      input += questions[index].choices[i];
+      item.append(input);
+      radioList.append(item);
+    }
+    return radioList;
+  }
+  
+  // Reads the user selection and pushes the value to an array
+  function choose() {
+    selections[questionCounter] = +$('input[name="answer"]:checked').val();
+  }
+  
+  // Displays next requested element
+  function displayNext() {
+    quiz.fadeOut(function() {
+      $('#question').remove();
+      
+      if(questionCounter < questions.length){
+        var nextQuestion = createQuestionElement(questionCounter);
+        quiz.append(nextQuestion).fadeIn();
+        if (!(isNaN(selections[questionCounter]))) {
+          $('input[value='+selections[questionCounter]+']').prop('checked', true);
+        }
+        
+        // Controls display of 'prev' button
+        if(questionCounter === 1){
+          $('#prev').show();
+        } else if(questionCounter === 0){
+          
+          $('#prev').hide();
+          $('#next').show();
+        }
+      }else {
+        var scoreElem = displayScore();
+        quiz.append(scoreElem).fadeIn();
+        $('#next').hide();
+        $('#prev').hide();
+        $('#start').show();
+      }
+    });
+  }
+  
+  // Computes score and returns a paragraph element to be displayed
+  function displayScore() {
+    var score = $('<p>',{id: 'question'});
+    var numCorrect = 0;
+    for (var i = 0; i < selections.length; i++) {
+      if (selections[i] === questions[i].correctAnswer) {
+        numCorrect++;
+      }
+    }
+    score.append(' Albert Einstein says : Υου got ' + numCorrect + ' questions out of ' +
+                 questions.length + ' right !!');
+	  
+    return score ;
+  }
+})();
+</script>
+</body>
+</html>
+
